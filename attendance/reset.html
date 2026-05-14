@@ -16,17 +16,23 @@
     <p> 
         A Reset Link Will Be Sent To Your SChool Email, If You Exist In Our Database
     </p>
-  	<form enctype="multipart/form-data">
+  
   		<div class="form-group">
-  			<label>Enter Email </label>
-  			<input type="" name="" placeholder="machelweks@gmail.com">
+  			<label> Enter Email </label> </label>
+  			<input type="" name="" placeholder="machelweks.student@kibu.ac.ke"id="txtemail">
   		
-  	    <button class="btn-primary">SEND RESET LINK</button>
+  	    <button class="btn-primary"id="btnreset">SEND RESET LINK</button>
         <button class="btn-register"><a href="index.html">BACK TO LOGIN</a></button>
-       
-  	</form>
+    
   </div>
 	
 </div>  
+<script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.16.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-auth.js"></script>	
+
+
+<script src="js/config.js"> </script>
+<script src="js/reset.js"></script>
 </body>
 </html>
