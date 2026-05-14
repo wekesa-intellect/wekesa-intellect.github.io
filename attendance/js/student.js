@@ -54,7 +54,7 @@ function loaddata(){
                 <td>${data.FirstName}</td>
                  <td>${data.LastName}</td>
                  <td>
-                 <button class="btn btnred">SUSPEND STUDENT</button>
+                 <button class="btn btnred" onclick="suspendstudent('${key}')">SUSPEND STUDENT</button>
                 </td>
               </tr>
                 ` 
@@ -64,3 +64,18 @@ function loaddata(){
 }
 
 loaddata();
+
+function suspendstudent(studentid){
+    let confirmSuspend = confirm("Are You Sure You Want To Suspend This Student ?")
+    if(!confirmSuspend) return;
+    firebase.database().ref("userDetails" + studentid).update({
+        Status: "inactive"
+    })
+    .then(()=>{
+        alert("Student Suspended")
+    })
+    .then((error)=>{
+        alert("Error While Suspending")
+    })
+
+}
