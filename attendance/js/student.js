@@ -158,9 +158,9 @@ firebase.database().ref("userDetails").once("value",function(snapshot){
     let total = 0
     snapshot.forEach(function(childSnapshot){
         let data = childSnapshot.val()
-      if (data.Role =="Student"){
+      if (data.Status == "inactive" && data.Role =="Student"){
     total++
       }
     })
-    lbatotalstudents.innerHTML=total
+    lbinactivestudents.innerHTML=total
 })

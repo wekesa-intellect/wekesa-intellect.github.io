@@ -26,7 +26,7 @@ firebase.database().ref("userDetails").once("value",function(snapshot){
     let total = 0
     snapshot.forEach(function(childSnapshot){
         let data = childSnapshot.val()
-        if (data.Status == "inactive"){
+        if (data.Status == "inactive" && data.Role =="Lecturer"){
     total++
       }
     })
@@ -44,4 +44,28 @@ firebase.database().ref("userDetails").once("value",function(snapshot){
       }
     })
     lbTotalLecturers.innerHTML=total
+})
+//count total number of students
+let lbstudents =document.getElementById('lbstudents')
+firebase.database().ref("userDetails").once("value",function(snapshot){
+    let total = 0
+    snapshot.forEach(function(childSnapshot){
+        let data = childSnapshot.val()
+      if (data.Role =="Student" && data.Status =="active"){
+    total++
+      }
+    })
+    lbstudents.innerHTML=total
+})
+//suspended students
+let lbsuspendedstudents =document.getElementById('lbsuspendedstudents')
+firebase.database().ref("userDetails").once("value",function(snapshot){
+    let total = 0
+    snapshot.forEach(function(childSnapshot){
+        let data = childSnapshot.val()
+        if (data.Status == "inactive" && data.Role =="Student"){
+    total++
+      }
+    })
+    lbsuspendedstudents.innerHTML=total
 })

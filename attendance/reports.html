@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reports | eClass Attendance</title>
+  <title>Admin Dashboard</title>
   <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/media print.css">
 </head>
 <body>
 
@@ -22,13 +23,13 @@
 <header class="header">
   <button class="menu-toggle">☰</button>
   <nav class="nav">
-    <a href="dashboard.html">Dashboard</a>
+    <a href="#">Dashboard</a>
     <a href="courses.html">Courses</a>
     <a href="students.html">Students</a>
     <a href="admins.html">Admins</a>
-    <a href="#">Reports</a>
+    <a href="reports.html">Reports</a>
     <a href="gps.html">GPS</a>
-    <a href="index.html" onclick="logout()">Logout</a>
+    <a href="index.html"onclick="logout()">Logout</a>
   </nav>
 </header>
 
@@ -37,201 +38,57 @@
 
   <!-- Cards -->
   <div class="cards-grid">
-    <div class="card"><h3>Total Students</h3><p class="stat-number">350</p></div>
-    <div class="card"><h3>Avg Attendance</h3><p class="stat-number">84%</p></div>
-    <div class="card"><h3>At Risk</h3><p class="stat-number">23</p></div>
-    <div class="card"><h3>Sessions Held</h3><p class="stat-number">412</p></div>
-  </div>
-
-  <!-- Attendance Report Table -->
-  <div class="card">
-    <h2>Attendance Report</h2>
-
-    <!-- Filters -->
-    <div class="form-group" style="flex-direction: row; gap: 10px; flex-wrap: wrap; margin-bottom: 14px;">
-      <select id="filterProgram" onchange="filterReport()">
-        <option value="">All Programs</option>
-        <option value="IT">IT</option>
-        <option value="CS">CS</option>
-        <option value="SE">SE</option>
-      </select>
-      <select id="filterStatus" onchange="filterReport()">
-        <option value="">All Status</option>
-        <option value="Good">Good</option>
-        <option value="Average">Average</option>
-        <option value="At Risk">At Risk</option>
-      </select>
-      <input type="text" id="searchInput" placeholder="Search student..." oninput="filterReport()">
+    <div class="card">
+      <h3>Total Users</h3>
+      <canvas id="mybargraph"></canvas>
     </div>
-
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Student ID</th>
-            <th>Name</th>
-            <th>Program</th>
-            <th>Attended</th>
-            <th>Total Classes</th>
-            <th>Attendance %</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="reportTableBody">
-          <tr><td>2026001</td><td>Michael Karani</td><td>IT</td><td>28</td><td>30</td><td>93%</td><td>Good</td></tr>
-          <tr><td>2026002</td><td>Faith Cecilia</td><td>CS</td><td>26</td><td>30</td><td>87%</td><td>Good</td></tr>
-          <tr><td>2026003</td><td>Nemrod Korir</td><td>SE</td><td>13</td><td>30</td><td>43%</td><td>At Risk</td></tr>
-          <tr><td>2026004</td><td>Amina Wanjiku</td><td>CS</td><td>29</td><td>30</td><td>97%</td><td>Good</td></tr>
-          <tr><td>2026005</td><td>James Odhiambo</td><td>IT</td><td>19</td><td>28</td><td>68%</td><td>Average</td></tr>
-          <tr><td>2026006</td><td>Beatrice Mutua</td><td>SE</td><td>24</td><td>30</td><td>80%</td><td>Good</td></tr>
-        </tbody>
-      </table>
+    <div class="card">
+      <h3>Courses</h3>
+     <canvas id="mypiechart"></canvas>
     </div>
-  </div>
-
-  <!-- Course Summary Table -->
-  <div class="card">
-    <h2>Course Attendance Summary</h2>
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Course Code</th>
-            <th>Course Name</th>
-            <th>Lecturer</th>
-            <th>Students</th>
-            <th>Avg Attendance</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>CS 101</td><td>Intro to Computer Science</td><td>Dr. James Mwangi</td><td>45</td><td>87%</td><td>Good</td></tr>
-          <tr><td>IT 204</td><td>Database Management</td><td>Prof. Alice Njeri</td><td>38</td><td>79%</td><td>Average</td></tr>
-          <tr><td>SE 301</td><td>Software Engineering</td><td>Mr. Kevin Otieno</td><td>52</td><td>91%</td><td>Good</td></tr>
-          <tr><td>CS 450</td><td>Machine Learning</td><td>Dr. Sarah Kamau</td><td>29</td><td>55%</td><td>At Risk</td></tr>
-          <tr><td>SE 102</td><td>OOP</td><td>Ms. Grace Achieng</td><td>60</td><td>97%</td><td>Good</td></tr>
-        </tbody>
-      </table>
+    <div class="card">
+      <h3> Lecturers</h3>
+      <canvas id="mydoughnut"></canvas>
     </div>
-  </div>
-
-  <!-- Generate Report Form -->
   <div class="card">
-    <h2>Generate Report</h2>
-    <form onsubmit="generateReport(event)">
-      <div class="form-group">
-        <label>Report Type</label>
-        <select id="reportType">
-          <option>Attendance Report</option>
-          <option>Enrollment Report</option>
-          <option>At-Risk Students</option>
-          <option>Course Summary</option>
-          <option>Lecturer Report</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Program</label>
-        <select id="reportProgram">
-          <option value="">All Programs</option>
-          <option>CS</option>
-          <option>IT</option>
-          <option>SE</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Date From</label>
-        <input type="date" id="dateFrom">
-      </div>
-      <div class="form-group">
-        <label>Date To</label>
-        <input type="date" id="dateTo">
-      </div>
-      <div class="form-group">
-        <label>Format</label>
-        <select id="reportFormat">
-          <option>PDF</option>
-          <option>Excel</option>
-          <option>Print</option>
-        </select>
-      </div>
-      <button type="submit" class="btn-primary">Generate Report</button>
-    </form>
-  </div>
-
+    <h3>Students</h3>
+   <canvas id="mybubblechart"></canvas>
+ </div>
 </main>
+<!-- Print Button -->
+<div style="text-align: right; margin-bottom: 12px;">
+  <button class="btn-primary" onclick="window.print()">🖨️ Print Dashboard</button>
+</div>
 
 <!-- FOOTER -->
 <footer class="footer">
   <p>© 2026 eClass Attendance</p>
 </footer>
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/7.16.0/firebase-database.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-auth.js"></script>	
 
-<script src="js/config.js"></script>
+
+<script src="js/config.js"> </script>
+<script src="js/report.js"> </script>
 
 <script>
-  // Mobile nav toggle
   const menuToggle = document.querySelector('.menu-toggle');
   const nav = document.querySelector('.nav');
   menuToggle.addEventListener('click', () => {
     nav.classList.toggle('active');
     menuToggle.textContent = nav.classList.contains('active') ? "✖" : "☰";
   });
-
-  // Auth check
-  let lbusername = document.getElementById('lbusername');
-  auth.onAuthStateChanged(function(user) {
-    if (user) {
-      lbusername.innerHTML = user.email;
-    } else {
-      window.location = 'index.html';
+let lbusername = document.getElementById('lbusername')
+  auth.onAuthStateChanged( function(user) {
+    if(user){
+      let username = user.email.split('@')[0]
+      lbusername.innerHTML = user.email
+    }else{
+      window.location = 'index.html'
     }
-  });
-
-  // Filter table
-  function filterReport() {
-    const program = document.getElementById('filterProgram').value;
-    const status  = document.getElementById('filterStatus').value;
-    const search  = document.getElementById('searchInput').value.toLowerCase();
-    const rows    = document.querySelectorAll('#reportTableBody tr');
-
-    rows.forEach(row => {
-      const rowProgram = row.cells[2].textContent.trim();
-      const rowStatus  = row.cells[6].textContent.trim();
-      const rowText    = row.textContent.toLowerCase();
-
-      const matchProgram = !program || rowProgram === program;
-      const matchStatus  = !status  || rowStatus === status;
-      const matchSearch  = rowText.includes(search);
-
-      row.style.display = (matchProgram && matchStatus && matchSearch) ? '' : 'none';
-    });
-  }
-
-  // Generate report handler
-  function generateReport(e) {
-    e.preventDefault();
-    const type    = document.getElementById('reportType').value;
-    const program = document.getElementById('reportProgram').value || 'All Programs';
-    const from    = document.getElementById('dateFrom').value;
-    const to      = document.getElementById('dateTo').value;
-    const format  = document.getElementById('reportFormat').value;
-
-    if (!from || !to) {
-      alert('Please select a date range.');
-      return;
-    }
-
-    alert(`Generating "${type}"\nProgram: ${program}\nFrom: ${from}  To: ${to}\nFormat: ${format}`);
-    // TODO: connect to Firebase to fetch and export real data
-  }
-
-  // Default dates
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('dateTo').value   = today;
-  document.getElementById('dateFrom').value = '2026-01-01';
+  })
 </script>
 
 </body>
