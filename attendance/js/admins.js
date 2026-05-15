@@ -1,6 +1,6 @@
 let btnaddstudent= document.getElementById('btnaddstudent')
 
-btnaddstudent.addEventListener('click', () =>{
+btnaddadmin.addEventListener('click', () =>{
  let txtfname = document.getElementById("txtfname").value
  let txtlname = document.getElementById("txtlname").value
  let txtemail = document.getElementById("txtemail").value
@@ -13,7 +13,7 @@ btnaddstudent.addEventListener('click', () =>{
   		let emailid = txtemail.replace(/\./g, "_dot_").replace(/@/g, "_at_")
   		let status = "inactive"
   		let timenow = Date.now(); 
-  		let role = "Student"
+  		let role = "Admin"
         let autopassword ="12345678"
         let user = firebase.auth().currentUser;
         let createdby  = user.email
@@ -48,13 +48,13 @@ function loaddata(){
             let data = childSnapshot.val()
             let key = childSnapshot.key
 
-            if (data.Status=="active" && data.Role=="Student"){
+            if (data.Status=="active" && data.Role=="Admin"){
                 tablebody.innerHTML += `
                 <td>${data.Email}</td>
                 <td>${data.FirstName}</td>
                  <td>${data.LastName}</td>
                  <td>
-                 <button class="btn btnred" onclick="suspendstudent('${key}')">SUSPEND STUDENT</button>
+                 <button class="btn btnred" onclick="suspendadmin('${key}')">SUSPEND ADMIN</button>
                 </td>
               </tr>
                 ` 
@@ -65,14 +65,14 @@ function loaddata(){
 
 loaddata();
 
-function suspendstudent(studentid){
-    let confirmSuspend = confirm("Are You Sure You Want To Suspend This Student ?")
+function suspendadmin(adminid){
+    let confirmSuspend = confirm("Are You Sure You Want To Suspend This Admin ?")
     if(!confirmSuspend) return;
-    firebase.database().ref("userDetails" + studentid).update({
+    firebase.database().ref("userDetails" + adminid).update({
         Status: "inactive"
     })
     .then(()=>{
-        alert("Student Suspended")
+        alert("Admin Suspended")
     })
     .then((error)=>{
         alert("Error While Suspending")
@@ -93,14 +93,14 @@ function loaddatainactive(){
             let data = childSnapshot.val()
             let key = childSnapshot.key
 
-            if(data.Status == "inactive" && data.Role == "Student"){
+            if(data.Status == "inactive" && data.Role == "Admin"){
                 tablebody.innerHTML += `
                     <tr>
                      <td>${data.Email}</td>
                      <td>${data.FirstName}</td>
                      <td>${data.LastName}</td>
                      <td>
-                      <button class="btn btngreen" onclick="activatestudent('${key}')" > Activate</button>
+                      <button class="btn btngreen" onclick="activateadmin('${key}')" > Activate</button>
                       </td>
                     </tr>
                 `
@@ -113,16 +113,16 @@ function loaddatainactive(){
 loaddatainactive();
 
 
-function activatestudent(studentid){
-    let confirmSuspend = confirm("Are you sure you want to activate this student ?")
+function activateadmin(adminid){
+    let confirmSuspend = confirm("Are you sure you want to activate this Admin ?")
     if(!confirmSuspend) return;
-    firebase.database().ref("userDetails/" + studentid).update({
+    firebase.database().ref("userDetails/" + adminid).update({
         Status:"active"
     })
     .then(() =>{
-        alert("Student activated")
+        alert("Admin activated")
     })
-    .then((error) =>{
+    .catch((error) =>{
         alert("Error while activating")
     })
 
