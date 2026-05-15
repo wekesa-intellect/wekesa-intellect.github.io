@@ -127,3 +127,40 @@ function activatestudent(studentid){
     })
 
 }
+
+//count active students
+let lbactivestudents =document.getElementById('lbactivestudents')
+firebase.database().ref("userDetails").once("value",function(snapshot){
+    let total = 0
+    snapshot.forEach(function(childSnapshot){
+        let data = childSnapshot.val()
+      if (data.Status == "active" && data.Role =="Student"){
+    total++
+      }
+    })
+    lbactivestudents.innerHTML=total
+})
+//count inactive students
+let lbinactivestudents =document.getElementById('lbinactivestudents')
+firebase.database().ref("userDetails").once("value",function(snapshot){
+    let total = 0
+    snapshot.forEach(function(childSnapshot){
+        let data = childSnapshot.val()
+      if (data.Status == "inactive" && data.Role =="Student"){
+    total++
+      }
+    })
+    lbinactivestudents.innerHTML=total
+})
+//total number of students
+let lbatotalstudents =document.getElementById('lbatotalstudents')
+firebase.database().ref("userDetails").once("value",function(snapshot){
+    let total = 0
+    snapshot.forEach(function(childSnapshot){
+        let data = childSnapshot.val()
+      if (data.Role =="Student"){
+    total++
+      }
+    })
+    lbatotalstudents.innerHTML=total
+})

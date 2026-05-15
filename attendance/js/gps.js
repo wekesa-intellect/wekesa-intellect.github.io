@@ -158,3 +158,28 @@ function editVenue(venueCode){
     });
 
 }
+
+//count active gps
+let totalactiveGps =document.getElementById('totalactiveGps')
+firebase.database().ref("GpsVenus").once("value",function(snapshot){
+    let total = 0
+    snapshot.forEach(function(childSnapshot){
+        let data = childSnapshot.val()
+      if (data.Status == "active"){
+    total++
+      }
+    })
+    totalactiveGps.innerHTML=total
+})
+//count inactive gps
+let totalinactiveGps =document.getElementById('totalinactiveGps')
+firebase.database().ref("GpsVenus").once("value",function(snapshot){
+    let total = 0
+    snapshot.forEach(function(childSnapshot){
+        let data = childSnapshot.val()
+      if (data.Status == "inactive"){
+    total++
+      }
+    })
+    totalinactiveGps.innerHTML=total
+})

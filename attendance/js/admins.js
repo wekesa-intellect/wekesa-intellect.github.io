@@ -127,3 +127,39 @@ function activateadmin(adminid){
     })
 
 }
+//count total admins
+let lbtotaladmins =document.getElementById('lbtotaladmins')
+firebase.database().ref("userDetails").once("value",function(snapshot){
+    let total = 0
+    snapshot.forEach(function(childSnapshot){
+        let data = childSnapshot.val()
+      if (data.Role =="Admin"){
+    total++
+      }
+    })
+    lbtotaladmins.innerHTML=total
+})
+//count active admins
+let lbactiveadmins =document.getElementById('lbactiveadmins')
+firebase.database().ref("userDetails").once("value",function(snapshot){
+    let total = 0
+    snapshot.forEach(function(childSnapshot){
+        let data = childSnapshot.val()
+      if (data.Status == "active" && data.Role =="Admin"){
+    total++
+      }
+    })
+    lbactiveadmins.innerHTML=total
+})
+//count inactive admins
+let lbinactiveadmins =document.getElementById('lbinactiveadmins')
+firebase.database().ref("userDetails").once("value",function(snapshot){
+    let total = 0
+    snapshot.forEach(function(childSnapshot){
+        let data = childSnapshot.val()
+      if (data.Status == "inactive" && data.Role =="Admin"){
+    total++
+      }
+    })
+    lbinactiveadmins.innerHTML=total
+})

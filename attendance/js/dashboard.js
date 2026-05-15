@@ -2,8 +2,8 @@
 let lbTotalStudents =document.getElementById('lbTotalStudents')
 firebase.database().ref("userDetails").once("value",function(snapshot){
     let total = 0
-    snapshot.forEach(function(childsnapshot){
-        let data = childsnapshot.val()
+    snapshot.forEach(function(childSnapshot){
+        let data = childSnapshot.val()
         total++
     })
     lbTotalStudents.innerHTML=total
@@ -13,8 +13,8 @@ firebase.database().ref("userDetails").once("value",function(snapshot){
 let lbTotalCourses =document.getElementById('lbTotalCourses')
 firebase.database().ref("Courses").once("value",function(snapshot){
     let total = 0
-    snapshot.forEach(function(childsnapshot){
-        let data = childsnapshot.val()
+    snapshot.forEach(function(childSnapshot){
+        let data = childSnapshot.val()
         total++
     })
     lbTotalCourses.innerHTML=total
@@ -22,22 +22,26 @@ firebase.database().ref("Courses").once("value",function(snapshot){
 
 //total approvals
 let lbTotalApprovals =document.getElementById('lbTotalApprovals')
-firebase.database().ref("Status").once("value",function(snapshot){
+firebase.database().ref("userDetails").once("value",function(snapshot){
     let total = 0
-    snapshot.forEach(function(childsnapshot){
-        let data = childsnapshot.val()
-        total++
+    snapshot.forEach(function(childSnapshot){
+        let data = childSnapshot.val()
+        if (data.Status == "inactive"){
+    total++
+      }
     })
     lbTotalApprovals.innerHTML=total
 })
 
 //lecturer count
-let lbTotalApprovals =document.getElementById('lbTotalApprovals')
-firebase.database().ref("Status").once("value",function(snapshot){
+let lbTotalLecturers =document.getElementById('lbTotalLecturers')
+firebase.database().ref("userDetails").once("value",function(snapshot){
     let total = 0
-    snapshot.forEach(function(childsnapshot){
-        let data = childsnapshot.val()
-        total++
+    snapshot.forEach(function(childSnapshot){
+        let data = childSnapshot.val()
+      if (data.Role == "Admin"){
+    total++
+      }
     })
-    lbTotalApprovals.innerHTML=total
+    lbTotalLecturers.innerHTML=total
 })
