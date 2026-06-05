@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Attendance | eClass</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background:#f0f2f5; }
+        .topbar { background:#1e2a3a; color:white; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+        .container { max-width:1200px; margin:2rem auto; padding:0 1rem; }
+        .card { background:white; border-radius:16px; padding:1.5rem; margin-bottom:2rem; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+        table { width:100%; border-collapse:collapse; margin-top:1rem; }
+        th, td { padding:0.75rem; text-align:left; border-bottom:1px solid #ddd; }
+        th { background:#f8f9fa; }
+        .eligible { color:green; font-weight:bold; }
+        .not-eligible { color:red; font-weight:bold; }
+        .back-link { display:inline-block; margin-bottom:1rem; color:#3498db; text-decoration:none; }
+        .footer { text-align:center; padding:1rem; background:#1e2a3a; color:white; margin-top:2rem; }
+        .percentage-bar { background:#e0e0e0; border-radius:10px; height:10px; width:100%; margin-top:5px; }
+        .percentage-fill { background:#2ecc71; height:10px; border-radius:10px; width:0%; }
+    </style>
+  
+</head>
+<body>
+<div class="topbar">
+    <div> My Attendance Report</div>
+    <div><span id="userEmail"></span> | <a href="student portal.html" style="color:white">Dashboard</a></div>
+</div>
+
+<div class="container">
+    <a href="student portal.html" class="back-link">← Back to Dashboard</a>
+
+    <div class="card">
+        <h2>Attendance Records</h2>
+        <div id="recordsTable">Loading...</div>
+    </div>
+
+    <div class="card">
+        <h2> Course-wise Attendance Percentage</h2>
+        <div id="percentageView">Loading...</div>
+    </div>
+
+    <div class="card">
+        <h2> End-of-Semester Eligibility Report</h2>
+        <div id="eligibilityReport">Loading...</div>
+    </div>
+</div>
+
+<div class="footer">
+    <p>© 2026 eClass Attendance – 80% required to sit exams</p>
+</div>
+</body>
+</html>

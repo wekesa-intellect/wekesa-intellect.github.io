@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Session | Lecturer Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: #f0f2f5;
+        }
+        .topbar {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .container {
+            max-width: 700px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        .card h1 {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 0.3rem;
+        }
+        .subtext {
+            color: #7f8c8d;
+            margin-bottom: 1.8rem;
+            font-size: 0.9rem;
+            border-left: 3px solid #f39c12;
+            padding-left: 0.8rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+        select, input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ccd1d9;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: 0.2s;
+        }
+        select:focus, input:focus {
+            outline: none;
+            border-color: #f39c12;
+            box-shadow: 0 0 0 2px rgba(243,156,18,0.2);
+        }
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+        .btn {
+            flex: 1;
+            padding: 0.8rem 1.2rem;
+            border: none;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: center;
+            text-decoration: none;
+        }
+        .btn-primary {
+            background: #19034e;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #0c0242;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: #ecf0f1;
+            color: #2c3e50;
+        }
+        .btn-secondary:hover {
+            background: #bdc3c7;
+        }
+        .message {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            border-radius: 12px;
+            display: none;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .footer {
+            text-align: center;
+            padding: 1rem;
+            background: #2c3e50;
+            color: white;
+            margin-top: 2rem;
+        }
+        @media (max-width: 550px) {
+            .button-group { flex-direction: column; }
+        }
+    </style>
+    <!-- Firebase -->
+    
+</head>
+<body>
+<div class="topbar">
+    <div> eClass Lecturer Portal</div>
+    <div><button id="logoutBtn" style="background:#e74c3c; color:white; border:none; padding:0.4rem 1rem; border-radius:8px; cursor:pointer;">Logout</button></div>
+    
+</div>
+<a href="lec dashboard.html">← Back to Dashboard</a>
+<div class="container">
+    <div class="card">
+        <h1> Start New Session</h1>
+        <div class="subtext">A unique time‑bound attendance code will be generated</div>
+
+        <div class="form-group">
+            <label> Select Course</label>
+            <select id="courseSelect">
+                <option value="">-- Choose course --</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Session Duration (minutes)</label>
+            <input type="number" id="sessionDuration" value="120" step="1" min="1">
+            <small>Total length of the class / session</small>
+        </div>
+
+        <div class="form-group">
+            <label>Code Validity (minutes)</label>
+            <input type="number" id="codeValidity" value="10" step="1" min="1">
+            <small>How long the generated code will remain active</small>
+        </div>
+
+        <div class="button-group">
+            <button class="btn btn-secondary" id="cancelBtn">Cancel</button>
+            <button class="btn btn-primary" id="generateBtn"> Generate Code & Start</button>
+        </div>
+
+        <div id="message" class="message"></div>
+    </div>
+</div>
+
+<div class="footer">
+    <p>© 2026 eClass – Automated Attendance System</p>
+</div>
+  
+</body>
+</html>

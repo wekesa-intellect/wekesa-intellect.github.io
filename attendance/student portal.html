@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard | eClass</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: #f0f2f5;
+        }
+        .topbar {
+            background: #1e2a3a;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .logo img {
+            width: 50px;
+            height: auto;
+        }
+        .user {
+            font-weight: bold;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .welcome-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .feature-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.8rem;
+            text-align: center;
+            text-decoration: none;
+            color: #1e2a3a;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        .feature-card h3 {
+            margin: 1rem 0 0.5rem;
+            font-size: 1.5rem;
+        }
+        .feature-card p {
+            color: #5a6e7c;
+        }
+        .icon {
+            font-size: 3rem;
+        }
+        .footer {
+            text-align: center;
+            padding: 1rem;
+            background: #1e2a3a;
+            color: white;
+            margin-top: 2rem;
+        }
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-left: 1rem;
+        }
+        @media (max-width: 700px) {
+            .topbar { flex-direction: column; gap: 10px; text-align: center; }
+        }
+    </style>
+    
+</head>
+<body>
+<div class="topbar">
+    <div class="logo">
+        <img src="assets/images.jpg" alt="logo">
+    </div>
+    <div class="user">
+        <span id="userEmail">Loading...</span>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="welcome-card">
+        <h2>Welcome, Student!</h2>
+        <p>Use the options below to manage your courses, mark attendance, and track your progress.</p>
+    </div>
+
+    <div class="grid">
+        <a href="enrolls.html" class="feature-card">
+           
+            <h3>Enroll in Courses</h3>
+            <p>Browse all available courses and enroll before marking attendance.</p>
+        </a>
+        <a href="mark.html" class="feature-card">
+            
+            <h3>Mark Attendance</h3>
+            <p>Enter a 6‑digit code to sign your attendance for today's class.</p>
+        </a>
+        <a href="view.html" class="feature-card">
+            
+            <h3>View Attendance & Eligibility</h3>
+            <p>Check your attendance records, percentage, and exam eligibility report.</p>
+        </a>
+    </div>
+</div>
+
+<div class="footer">
+    <p>© 2026 eClass Attendance – Student Portal</p>
+</div>
+
+
+</body>
+</html>
