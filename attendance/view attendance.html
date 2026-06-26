@@ -34,5 +34,143 @@
 </div>
 <div style="margin-bottom: 1rem; text-align: right;">
     <button onclick="exportToExcel(reportData, 'attendance')" style="background:#27ae60; color:white; padding:0.5rem 1rem; border:none; border-radius:8px; cursor:pointer;">📎 Export to Excel</button>
+
+<script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.16.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-auth.js"></script>
+<script src="js/config.js"></script>
+<script>
+(function(){
+  const courseNameEl = document.getElementById('courseName');
+  const reportTableEl = document.getElementById('reportTable');
+
+  function getQuery(name){
+    return new URL(window.location.href).searchParams.get(name);
+  }
+
+  function escapeHtml(str){
+    return String(str||'')
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'<')
+      .replace(/>/g,'>')
+      .replace(/"/g,'"')
+      .replace(/'/g,'&#039;');
+  }
+
+  // Minimal export used by the existing button. (Creates a CSV download.)
+  window.exportToExcel = function(reportData, filename){
+    if (!Array.isArray(reportData) || reportData.length === 0){
+      alert('No data to export');
+      return;
+    }
+    const headers = Object.keys(reportData[0]);
+    const rows = reportData.map(r => headers.map(h => (r[h] ?? '')).join(','));
+    const csv = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (filename || 'attendance') + '.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function loadAttendance(){
+    const courseCode = getQuery('course');
+    const sessionCode = getQuery('session');
+    if (!courseCode || !sessionCode){
+      reportTableEl.innerHTML = 'Missing course/session in URL.';
+      return;
+    }
+
+    if (courseNameEl) courseNameEl.textContent = `Attendance - ${courseCode} (Session ${sessionCode})`;
+    reportTableEl.innerHTML = 'Loading...';
+
+    // Load course name (optional)
+    firebase.database().ref('Courses/' + courseCode).once('value').then(snap=>{
+      const c = snap.val();
+      if (c && courseNameEl) courseNameEl.textContent = `Attendance - ${c.Coursename || courseCode} (Session ${sessionCode})`;
+    });
+
+    // Students enrolled in this course
+    const enrollSnap = await firebase.database().ref('Enrollments/' + courseCode).once('value');
+    if (!enrollSnap.exists()){
+      reportTableEl.innerHTML = 'No enrollments found for this course.';
+      return;
+    }
+
+    const studentKeys = [];
+    enrollSnap.forEach(child=>{
+      studentKeys.push(child.key);
+    });
+
+    const report = [];
+    let totalStudents = studentKeys.length;
+    let presentCount = 0;
+
+    // For each student, read attendance record
+    for (const key of studentKeys){
+      const attendSnap = await firebase.database().ref(`Attendance/${courseCode}/${sessionCode}/${key}`).once('value');
+      const attendance = attendSnap.val();
+
+      // enrollment info (email/name)
+      const enrollment = (await firebase.database().ref(`Enrollments/${courseCode}/${key}`).once('value')).val();
+      const studentEmail = enrollment?.email || attendance?.studentEmail || '';
+      const firstName = enrollment?.FirstName || '';
+      const lastName = enrollment?.LastName || '';
+
+      const status = attendance?.status || (attendance ? 'Absent' : 'Absent');
+      const markedAt = attendance?.markedAt || '';
+
+      if (status === 'Present') presentCount++;
+
+      report.push({
+        studentEmail: studentEmail,
+        firstName: firstName,
+        lastName: lastName,
+        status: status,
+        markedAt: markedAt
+      });
+    }
+
+    const percentage = totalStudents ? Math.round((presentCount/totalStudents)*100) : 0;
+
+    const rowsHtml = report.map(r => `
+      <tr>
+        <td>${escapeHtml(r.studentEmail || '')}</td>
+        <td>${escapeHtml((r.firstName||'') + ' ' + (r.lastName||''))}</td>
+        <td class="${r.status === 'Present' ? 'eligible' : 'not-eligible'}">${escapeHtml(r.status)}</td>
+        <td>${escapeHtml(r.markedAt ? new Date(r.markedAt).toLocaleString() : '')}</td>
+      </tr>
+    `).join('');
+
+    reportTableEl.innerHTML = `
+      <div style="margin-bottom:10px;">Present: <b>${presentCount}</b> / ${totalStudents} (${percentage}%)</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Student Email</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Marked At</th>
+          </tr>
+        </thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+    `;
+
+    // expose for export button
+    window.reportData = report;
+  }
+
+  firebase.auth().onAuthStateChanged(function(user){
+    if (!user){ window.location.href = 'index.html'; return; }
+    loadAttendance().catch(err=>{
+      console.error(err);
+      reportTableEl.innerHTML = 'Failed to load attendance.';
+    });
+  });
+})();
+</script>
 </body>
 </html>

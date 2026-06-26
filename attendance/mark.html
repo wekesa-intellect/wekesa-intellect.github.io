@@ -53,5 +53,174 @@
 <div class="footer">
     <p>© 2026 eClass Attendance</p>
 </div>
+<script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.16.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-auth.js"></script>	
+
+
+<script src="js/config.js"> </script>
+<script>
+  function escapeHtml(str){
+    return String(str||'')
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'<')
+      .replace(/>/g,'>')
+      .replace(/"/g,'"')
+      .replace(/'/g,'&#039;');
+  }
+
+  const messageEl = document.getElementById('message');
+  function showMessage(msg, type){
+    if (!messageEl) return;
+    messageEl.style.display = 'block';
+    messageEl.className = 'message ' + (type === 'success' ? 'success' : 'error');
+    messageEl.innerText = msg;
+  }
+
+  function loadEnrolledCourses(){
+    const courseSelect = document.getElementById('courseSelect');
+    if (!courseSelect) return;
+
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    const emailKey = user.email.replace(/\./g, '_');
+
+    firebase.database().ref('Enrollments')
+      .once('value')
+      .then(snapshot => {
+        courseSelect.innerHTML = `<option value="">-- Select course --</option>`;
+
+        snapshot.forEach(courseSnap => {
+          const courseCode = courseSnap.key;
+          if (!courseSnap.hasChild(emailKey)) return;
+
+          firebase.database().ref('Courses')
+            .orderByChild('CourseCode')
+            .equalTo(courseCode)
+            .once('value')
+            .then(courseData => {
+              courseData.forEach(c => {
+                const course = c.val();
+                const option = document.createElement('option');
+                option.value = courseCode;
+                option.textContent = `${course.Coursename} (${courseCode})`;
+                courseSelect.appendChild(option);
+              });
+            });
+        });
+      });
+  }
+
+  function randomAttendanceId(){
+    return String(Date.now());
+  }
+
+  function isCodeValidFormat(code){
+    return /^[0-9]{6}$/.test(String(code||''));
+  }
+
+  async function submitAttendance(){
+    const courseSelect = document.getElementById('courseSelect');
+    const attendanceCodeEl = document.getElementById('attendanceCode');
+    const submitBtn = document.getElementById('submitAttendance');
+
+    if (!courseSelect || !attendanceCodeEl) return;
+
+    const courseCode = courseSelect.value;
+    const attendanceCode = String(attendanceCodeEl.value||'').trim();
+
+    if (!courseCode){ showMessage('Please select a course', 'error'); return; }
+    if (!isCodeValidFormat(attendanceCode)){ showMessage('Attendance code must be 6 digits', 'error'); return; }
+
+    const user = firebase.auth().currentUser;
+    if (!user){ showMessage('Login required', 'error'); return; }
+
+    const email = user.email;
+    const studentEmailKey = email.replace(/\./g, '_');
+
+    try{
+      // Verify session by code + course. (sessionCode == attendanceCode)
+      const sessionSnap = await firebase.database()
+        .ref(`Sessions/${courseCode}/${attendanceCode}`)
+        .once('value');
+
+      if (!sessionSnap.exists()){
+        showMessage('Invalid or expired code', 'error');
+        return;
+      }
+
+      const session = sessionSnap.val();
+      const now = Date.now();
+      const endTime = Number(session.endTime || 0);
+      const startTime = Number(session.startTime || 0);
+
+      if (endTime && now > endTime){
+        showMessage('This code has expired', 'error');
+        return;
+      }
+      if (startTime && now < startTime){
+        showMessage('Session has not started yet', 'error');
+        return;
+      }
+
+      const attendanceRef = firebase.database().ref(`Attendance/${courseCode}/${attendanceCode}/${studentEmailKey}`);
+
+      // prevent duplicate mark: if already exists, block
+      const existing = await attendanceRef.once('value');
+      if (existing.exists()){
+        showMessage('You have already marked attendance for this session', 'success');
+        return;
+      }
+
+      await attendanceRef.set({
+        studentEmail: email,
+        markedAt: now,
+        status: 'Present',
+        attendanceId: randomAttendanceId()
+      });
+
+      showMessage('Attendance marked successfully!', 'success');
+
+      // update eligibility preview by redirecting to view.html?course=...&session=...
+      const courseCodeEncoded = encodeURIComponent(courseCode);
+      const sessionCodeEncoded = encodeURIComponent(attendanceCode);
+      // keep user on page; but also provide quick link
+      const msg = document.getElementById('message');
+      msg.innerHTML = 'Attendance marked successfully! <a style="color:#155724; text-decoration:underline;" href="view.html?course='+courseCodeEncoded+'&session='+sessionCodeEncoded+'">View attendance</a>';
+
+    }catch(e){
+      console.error(e);
+      showMessage('Failed to submit attendance', 'error');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    firebase.auth().onAuthStateChanged(function(user){
+      if (!user){ window.location.href = 'index.html'; return; }
+      loadEnrolledCourses();
+
+      // After courses load, disable submit if student has no enrollments
+      setTimeout(()=>{
+        const courseSelect = document.getElementById('courseSelect');
+        const submitBtn = document.getElementById('submitAttendance');
+        if (submitBtn && courseSelect){
+          const hasAnyCourse = courseSelect.options && courseSelect.options.length > 1;
+          submitBtn.disabled = !hasAnyCourse;
+          if (!hasAnyCourse){
+            showMessage('Please enroll in a course before marking attendance.', 'error');
+          }
+        }
+      }, 600);
+
+      const submitBtn = document.getElementById('submitAttendance');
+      if (submitBtn){
+        submitBtn.addEventListener('click', ()=>{
+          submitAttendance();
+        });
+      }
+    });
+  });
+</script>
 </body>
 </html>

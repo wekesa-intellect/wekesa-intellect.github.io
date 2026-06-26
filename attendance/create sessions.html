@@ -174,6 +174,101 @@
 <div class="footer">
     <p>© 2026 eClass – Automated Attendance System</p>
 </div>
-  
+
+<script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.16.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-auth.js"></script>
+<script src="js/config.js"></script>
+<script>
+(function(){
+  const courseSelect = document.getElementById('courseSelect');
+  const sessionDurationEl = document.getElementById('sessionDuration');
+  const codeValidityEl = document.getElementById('codeValidity');
+  const generateBtn = document.getElementById('generateBtn');
+  const messageEl = document.getElementById('message');
+
+  function showMessage(msg, type){
+    if (!messageEl) return;
+    messageEl.style.display = 'block';
+    messageEl.className = 'message ' + (type === 'success' ? 'success' : 'error');
+    messageEl.innerText = msg;
+  }
+
+  function escapeHtml(str){
+    return String(str||'')
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'<')
+      .replace(/>/g,'>')
+      .replace(/"/g,'"')
+      .replace(/'/g,'&#039;');
+  }
+
+  function random6(){
+    return String(Math.floor(100000 + Math.random()*900000));
+  }
+
+  function loadCoursesForLecturer(email){
+    if (!courseSelect) return;
+    courseSelect.innerHTML = '<option value="">-- Choose course --</option>';
+
+    firebase.database().ref('Courses').once('value').then(snapshot=>{
+      snapshot.forEach(cs=>{
+        const c = cs.val();
+        if (c && c.Lecturer === email && (c.Status === 'active' || c.Status === undefined)){
+          const opt = document.createElement('option');
+          opt.value = cs.key;
+          opt.textContent = `${c.Coursename || cs.key} (${cs.key})`;
+          courseSelect.appendChild(opt);
+        }
+      });
+    });
+  }
+
+  firebase.auth().onAuthStateChanged(function(user){
+    if (!user) { window.location.href = 'index.html'; return; }
+    loadCoursesForLecturer(user.email);
+  });
+
+  if (generateBtn){
+    generateBtn.addEventListener('click', async ()=>{
+      const courseCode = courseSelect ? courseSelect.value : '';
+      const sessionDurationMinutes = parseInt(sessionDurationEl.value, 10);
+      const codeValidityMinutes = parseInt(codeValidityEl.value, 10);
+
+      if (!courseCode){ showMessage('Please select a course', 'error'); return; }
+      if (!Number.isFinite(sessionDurationMinutes) || sessionDurationMinutes <= 0){ showMessage('Invalid session duration', 'error'); return; }
+      if (!Number.isFinite(codeValidityMinutes) || codeValidityMinutes <= 0){ showMessage('Invalid code validity', 'error'); return; }
+
+      const user = firebase.auth().currentUser;
+      if (!user) { showMessage('Login required', 'error'); return; }
+
+      const sessionCode = random6();
+      const createdAt = Date.now();
+      const startTime = createdAt;
+      const endTime = createdAt + sessionDurationMinutes * 60000;
+
+      const payload = {
+        courseCode: courseCode,
+        lecturerEmail: user.email,
+        createdAt: createdAt,
+        sessionDurationMinutes: sessionDurationMinutes,
+        codeValidityMinutes: codeValidityMinutes,
+        startTime: startTime,
+        endTime: endTime,
+        status: 'active',
+        sessionCode: sessionCode
+      };
+
+      try{
+        await firebase.database().ref(`Sessions/${courseCode}/${sessionCode}`).set(payload);
+        showMessage('Session created. Attendance code: ' + sessionCode, 'success');
+      }catch(e){
+        console.error(e);
+        showMessage('Failed to create session', 'error');
+      }
+    });
+  }
+})();
+</script>
 </body>
 </html>

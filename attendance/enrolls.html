@@ -90,6 +90,42 @@
         }
         .success { background: #d4edda; color: #155724; }
         .error { background: #f8d7da; color: #721c24; }
+        .courses-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.course-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.course-card h3 {
+    margin-bottom: 10px;
+}
+
+.course-card p {
+    margin: 5px 0;
+}
+
+.enroll-btn {
+    margin-top: 15px;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    background: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.enroll-btn:hover {
+    background: #0056b3;
+}
     </style>
     
 </head>
@@ -105,12 +141,163 @@
         <h2>Available Courses</h2>
         <p>Enroll in courses to be able to mark attendance.</p>
         <div id="message" class="message"></div>
-        <div id="coursesContainer" class="course-list">Loading courses...</div>
+       <!--- <div id="coursesContainer" class="course-list">Loading courses...</div> -->
+
+        <div id="coursesContainer" class="courses-container"> Loading ...</div>
     </div>
 </div>
 
 <div class="footer">
     <p>© 2026 eClass Attendance</p>
 </div>
+<script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.16.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-auth.js"></script>	
+
+
+<script src="js/config.js"> </script>
+<script>
+    function loadCourses() {
+    const coursesContainer = document.getElementById("coursesContainer");
+
+    firebase.database().ref("Courses").once("value")
+        .then((snapshot) => {
+
+            coursesContainer.innerHTML = "";
+
+            if (snapshot.exists()) {
+
+                snapshot.forEach((childSnapshot) => {
+
+                    const course = childSnapshot.val();
+
+                    // show enroll/unenroll based on whether current user is already enrolled
+                    const user = firebase.auth().currentUser;
+                    const emailKey = user ? user.email.replace(/\./g, '_') : null;
+                    let enrolledPromise = Promise.resolve(false);
+                    if (emailKey){
+                      enrolledPromise = firebase.database()
+                        .ref(`Enrollments/${course.CourseCode}/${emailKey}`)
+                        .once('value')
+                        .then(snap => snap.exists());
+                    }
+
+                    const card = `
+                        <div class="course-card">
+                            <h3>${course.Coursename}</h3>
+
+                            <p><strong>Course Code:</strong> ${course.CourseCode}</p>
+
+                            <p><strong>Lecturer:</strong> ${course.Lecturer}</p>
+
+                            <p><strong>Venue:</strong> ${course.Venue}</p>
+
+                            <button class="enroll-btn" data-course-code="${course.CourseCode}" data-action="enroll" onclick="enrollCourse('${course.CourseCode}')">
+                                Enroll Now
+                            </button>
+                            <button class="enroll-btn" data-course-code="${course.CourseCode}" data-action="unenroll" style="display:none; background:#e74c3c;" onclick="unenrollCourse('${course.CourseCode}')">
+                                Unenroll
+                            </button>
+
+                        </div>
+                    `;
+
+                    enrolledPromise.then(isEnrolled => {
+                      // update the buttons for the most recently rendered card (simple approach)
+                      const cards = coursesContainer.getElementsByClassName('course-card');
+                      const lastCard = cards[cards.length - 1];
+                      if (!lastCard) return;
+                      const buttons = lastCard.getElementsByClassName('enroll-btn');
+                      if (!buttons || buttons.length < 2) return;
+                      const enrollBtn = buttons[0];
+                      const unenrollBtn = buttons[1];
+                      if (isEnrolled){
+                        enrollBtn.disabled = true;
+                        enrollBtn.style.opacity = '0.6';
+                        enrollBtn.style.cursor = 'not-allowed';
+                        enrollBtn.innerText = 'Enrolled';
+                        unenrollBtn.style.display = 'block';
+                      }
+                    });
+
+                    coursesContainer.innerHTML += card;
+                });
+
+            } else {
+                coursesContainer.innerHTML =
+                    "<p>No courses available.</p>";
+            }
+        })
+        .catch((error) => {
+            console.error("Error loading courses:", error);
+        });
+}
+
+loadCourses();
+function unenrollCourse(courseCode){
+
+    const user = firebase.auth().currentUser;
+    if (!user){ alert('Please sign in first.'); return; }
+
+    const email = user.email;
+
+    if (!confirm('Unenroll from this course?')) return;
+
+    firebase.database()
+      .ref('Enrollments/' + courseCode + '/' + email.replace(/\./g,'_'))
+      .remove()
+      .then(()=>{
+        alert('Course unenrolled successfully!');
+        loadCourses();
+      })
+      .catch((error)=>{
+        console.error(error.message);
+        alert('Failed to unenroll.');
+      });
+}
+
+function enrollCourse(courseCode) {
+
+    const user = firebase.auth().currentUser;
+
+    if (!user) {
+        alert("Please sign in first.");
+        return;
+    }
+
+    const email = user.email;
+    console.log(email)
+
+    firebase.database()
+        .ref("Enrollments/" + courseCode + "/" + email.replace(/\./g, "_"))
+        .set({
+            email: email,
+            dateCreated: Date.now(),
+            status: "Active"
+        })
+        .then(() => {
+            alert("Course enrolled successfully!");
+            
+        })
+        .catch((error) => {
+            console.error(error.message);
+            alert("Failed to enroll.");
+        });
+}
+
+
+ firebase.auth().onAuthStateChanged(function(user) {
+
+    if (user) {
+        // User is logged in
+        document.getElementById("userEmail").innerText = user.email;
+
+    } else {
+        // No user logged in → redirect to login page
+        window.location.href = "index.html";
+    }
+});
+
+</script>
 </body>
 </html>

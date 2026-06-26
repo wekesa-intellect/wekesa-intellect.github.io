@@ -17,18 +17,21 @@ btnlogin.addEventListener("click",()=>{
        })
        .then((snapshot) =>{
         const userDetails = snapshot.val()
-        const role = userDetails.Role
+        const role = userDetails.Role.trim()
         const status =userDetails.Status
+        
         if (status=="active"){
-            if(role=="Admin"){
+            if(role === "Admin"){
                 //admin
                 window.location.href ="dashboard.html"
             }
-            else if (role =="student"){
-                //student
-                alert("student logged in")
-            }
-            else {
+            //student
+            else if (role === "Student"){
+               window.location.href = "student portal.html"
+               //lecturer
+            }else if (role === "Lecturer"){
+                window.location.href = "lec dashboard.html"
+            }else{
                 //active users with no roles 
                 alert("No Role Added,Connect With Admin")
             }

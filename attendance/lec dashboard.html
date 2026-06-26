@@ -64,6 +64,7 @@
     <div>Lecturer Portal - eClass Attendance</div>
     <div><span id="lecturerName"></span> <button class="btn logout-btn" onclick="logout()">Logout</button></div>
 </div>
+<a href="index.html"onclick="logout()">Logout</a>
 
 <div class="container">
     <div class="card">
@@ -90,8 +91,76 @@
 </div>
 
 <div class="footer">
-    <p>© 2026 eClass – Automated Attendance System</p>
+    <p>© 2026 eClass Attendance System</p>
 </div>
 
+
+<script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.16.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-auth.js"></script>
+<script src="js/config.js"></script>
+<script>
+(function(){
+  const coursesContainer = document.getElementById('coursesContainer');
+  const userEmailEl = document.getElementById('userEmail');
+  const lecturerNameEl = document.getElementById('lecturerName');
+
+  function escapeHtml(str){
+    return String(str||'')
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'<')
+      .replace(/>/g,'>')
+      .replace(/"/g,'"')
+      .replace(/'/g,'&#039;');
+  }
+
+  function loadLecturerCourses(user){
+    if (!user || !user.email) return;
+    const email = user.email;
+    if (userEmailEl) userEmailEl.textContent = email;
+    if (lecturerNameEl) lecturerNameEl.textContent = user.email;
+
+    firebase.database().ref('Courses').once('value').then(snapshot=>{
+      if (!coursesContainer) return;
+      coursesContainer.innerHTML = '';
+
+      const myCourses = [];
+      snapshot.forEach(cs=>{
+        const course = cs.val();
+        if (course && course.Lecturer === email && (course.Status === 'active' || course.Status === undefined)){
+          myCourses.push({ code: cs.key, ...course });
+        }
+      });
+
+      if (myCourses.length === 0){
+        coursesContainer.innerHTML = '<p>No assigned courses found.</p>';
+        return;
+      }
+
+      coursesContainer.innerHTML = myCourses.map(c=>{
+        const code = escapeHtml(c.CourseCode || c.code);
+        const name = escapeHtml(c.Coursename || c.Coursename);
+        return `
+          <div class="course-card">
+            <h3>${name}</h3>
+            <p><b>Course Code:</b> ${code}</p>
+            <p><b>Venue:</b> ${escapeHtml(c.Venue || '')}</p>
+            <a class="btn" href="create sessions.html?course=${encodeURIComponent(code)}">Create Session</a>
+            <a class="btn btn-warning" href="manage session.html?course=${encodeURIComponent(code)}">Manage Sessions</a>
+          </div>
+        `;
+      }).join('');
+    });
+  }
+
+  firebase.auth().onAuthStateChanged(function(user){
+    if (!user){
+      window.location.href = 'index.html';
+      return;
+    }
+    loadLecturerCourses(user);
+  });
+})();
+</script>
 </body>
 </html>

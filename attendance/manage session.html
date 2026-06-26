@@ -34,5 +34,100 @@
     </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.16.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.2.5/firebase-auth.js"></script>
+<script src="js/config.js"></script>
+<script>
+(function(){
+  const courseTitleEl = document.getElementById('courseTitle');
+  const sessionsListEl = document.getElementById('sessionsList');
+
+  function escapeHtml(str){
+    return String(str||'')
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'<')
+      .replace(/>/g,'>')
+      .replace(/"/g,'"')
+      .replace(/'/g,'&#039;');
+  }
+
+  function getQuery(name){
+    const url = new URL(window.location.href);
+    return url.searchParams.get(name);
+  }
+
+  function isExpired(endTime){
+    if (!endTime) return false;
+    return Date.now() > Number(endTime);
+  }
+
+  async function loadLecturerSessions(){
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    const requestedCourse = getQuery('course');
+    const lecturerEmail = user.email;
+
+    // if courseCode provided, only load that course; else load first assigned course
+    let courseCode = requestedCourse;
+    if (!courseCode){
+      const coursesSnap = await firebase.database().ref('Courses').once('value');
+      let first;
+      coursesSnap.forEach(cs=>{
+        const c = cs.val();
+        if (!first && c && c.Lecturer === lecturerEmail && (c.Status === 'active' || c.Status === undefined)){
+          first = cs.key;
+        }
+      });
+      courseCode = first;
+    }
+
+    if (!courseCode){
+      sessionsListEl.innerHTML = 'No assigned course found.';
+      return;
+    }
+
+    if (courseTitleEl) courseTitleEl.textContent = 'Sessions for ' + courseCode;
+
+    const sessionsSnap = await firebase.database().ref('Sessions/' + courseCode).once('value');
+    if (!sessionsListEl) return;
+    sessionsListEl.innerHTML = '';
+
+    if (!sessionsSnap.exists()){
+      sessionsListEl.innerHTML = 'No sessions created yet.';
+      return;
+    }
+
+    const rows = [];
+    sessionsSnap.forEach(ss=>{
+      const session = ss.val();
+      // lecturer filter (by stored lecturerEmail)
+      if (!session || session.lecturerEmail !== lecturerEmail) return;
+
+      const sessionCode = ss.key;
+      const expired = isExpired(session.endTime);
+      rows.push(`
+        <div class="course-item" style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #e0e0e0;">
+          <div>
+            <b>Session Code:</b> ${escapeHtml(sessionCode)}<br/>
+            <span style="color:#666;">${expired ? 'Expired' : 'Active'}</span>
+          </div>
+          <div>
+            <a class="btn" href="view attendance.html?course=${encodeURIComponent(courseCode)}&session=${encodeURIComponent(sessionCode)}">View Attendance</a>
+          </div>
+        </div>
+      `);
+    });
+
+    sessionsListEl.innerHTML = rows.length ? rows.join('') : 'No sessions found for this lecturer.';
+  }
+
+  firebase.auth().onAuthStateChanged(function(user){
+    if (!user){ window.location.href = 'index.html'; return; }
+    loadLecturerSessions().catch(console.error);
+  });
+})();
+</script>
 </body>
 </html>
